@@ -1,8 +1,9 @@
 /*
- * Zumo Demo
- *
  * Based on Polulu line-following example
  */
+
+#ifndef MY_LIBRARY_H
+#define MY_LIBRARY_H
 
 #include <QTRSensors.h>
 #include <ZumoReflectanceSensorArray.h>
@@ -19,4 +20,9 @@ int lastError = 0;
 
 unsigned int sensors[6];
 
-int position=0;
+int position = 0;
+
+
+void selectState();
+
+#endif
