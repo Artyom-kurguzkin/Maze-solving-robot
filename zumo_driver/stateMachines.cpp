@@ -1,7 +1,7 @@
 #include "header.h"
 
 
-int counter = 1;
+int counter = 1; //added one more for the crossroads
 
 
 const int SPEED_MAX  = 100;
@@ -34,9 +34,9 @@ void stateCalibrate()
   for(i = 0; i < 80; i++)
   {
    if((i > 10 && i <= 30) || (i > 50 && i <= 70))
-     motors.setSpeeds(-SPEED_MAX, SPEED_MAX);
+     motors.setSpeeds(-300, 300);
    else
-     motors.setSpeeds(SPEED_MAX, -SPEED_MAX);
+     motors.setSpeeds(300, -300);
    reflectanceSensors.calibrate();
    delay(20);
   }
@@ -83,7 +83,7 @@ void stateStop()
   Serial.println("stopping");
   Serial0.println("stopping");
   motors.setSpeeds(SPEED_HALT, SPEED_HALT);
-  if( counter == 0 )
+  if( counter <= 0 )
   {
     while(1);
     pinMode(13, OUTPUT);
@@ -93,6 +93,14 @@ void stateStop()
   }
   delay( 5000 ); 
   counter = counter - 1;
+}
+
+
+void turnLeft()
+{
+  Serial.println("left");
+  Serial0.println("left");
+  motors.setSpeeds( -SPEED_MIN, SPEED_MAX);
 }
 
 
@@ -125,7 +133,7 @@ void selectState()
              error < 2500 ){ state = GO_RIGHT; }
     else if( error < 0    ){ state = GO_LEFT; }
     else if( error == 2500 ){ state = STOP; }
-    else if( error == 0    ){ state = TURN_LEFT; }
+    else if( position < 2500 ){ state = TURN_LEFT; }
   }
   else if( previous_state == GO_RIGHT )
   {
@@ -133,17 +141,17 @@ void selectState()
              error < 2500 ){ state = GO_RIGHT; }
     else if( error < 0    ){ state = GO_LEFT; }
     else if( error == 2500 ){ state = STOP; }
-    else if( error == 0    ){ state = TURN_LEFT; }
+    else if( position < 2500 ){ state = TURN_LEFT; }
   }
   else if( previous_state == STOP ){ state = GO_BLIND; }
   else if( previous_state == GO_BLIND )
   {
     if( error == 2500 ){ state = GO_BLIND; }
-    else{ GO_LEFT; }
+    else{ state = GO_LEFT; }
   }
-  else if( error == 0 || previous_state == TURN_LEFT )
+  else if( position < 2500 && previous_state == TURN_LEFT )
   {
-    if( sensors[1] > 100){ state = GO_LEFT; }
+    if( sensors[1] > 100){ state = TURN_LEFT; }
     else
       state = TURN_LEFT;
   }
@@ -172,6 +180,11 @@ void selectState()
     case GO_BLIND:
       stateBlind();
       break;
+
+    case TURN_LEFT:
+      stateBlind();
+      break;
+
 
     default:
       goRight();
