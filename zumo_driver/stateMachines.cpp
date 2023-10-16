@@ -4,7 +4,8 @@
 int counter = 1;
 
 
-const int SPEED_MAX  = 200;
+const int SPEED_MAX  = 100;
+const int SPEED_MIN  = 20;
 const int SPEED_HALT = 0;
 
 // states
@@ -33,9 +34,9 @@ void stateCalibrate()
   for(i = 0; i < 80; i++)
   {
    if((i > 10 && i <= 30) || (i > 50 && i <= 70))
-     motors.setSpeeds(-200, 200);
+     motors.setSpeeds(-SPEED_MAX, SPEED_MAX);
    else
-     motors.setSpeeds(200, -200);
+     motors.setSpeeds(SPEED_MAX, -SPEED_MAX);
    reflectanceSensors.calibrate();
    delay(20);
   }
@@ -46,16 +47,10 @@ void stateCalibrate()
 
   Serial.println("calibration complete");
   Serial0.println("calibration complete");
-  digitalWrite(13, LOW);
+ 
+  button.waitForButton(); 
 
-  Serial.println("ready to begin");
-  Serial0.println("ready to begin");
-  button.waitForButton();
-  Serial.println("start");
-  Serial0.println("start");
-
-  // Delay for one second
-  delay(1000);
+  state = GO_RIGHT;
 }
 
 
@@ -63,7 +58,7 @@ void goRight()
 {
   Serial.println("right");
   Serial0.println("right");
-  motors.setSpeeds(SPEED_MAX, SPEED_HALT); 
+  motors.setSpeeds(SPEED_MAX, SPEED_MIN); 
 }
 
 
@@ -71,7 +66,7 @@ void goLeft()
 {
   Serial.println("left");
   Serial0.println("left");
-  motors.setSpeeds(SPEED_HALT, SPEED_MAX);  
+  motors.setSpeeds(SPEED_MIN, SPEED_MAX);  
 }
 
 
@@ -89,7 +84,13 @@ void stateStop()
   Serial0.println("stopping");
   motors.setSpeeds(SPEED_HALT, SPEED_HALT);
   if( counter == 0 )
-    exit( 0 );
+  {
+    while(1);
+    pinMode(13, OUTPUT);
+    digitalWrite(13, HIGH);
+    Serial.println("end");
+  Serial0.println("end");
+  }
   delay( 5000 ); 
   counter = counter - 1;
 }
@@ -112,7 +113,7 @@ void selectState()
 
   if( state == CALIBRATE )
   { 
-    state == CALIBRATE; 
+    state = CALIBRATE; 
   }
   else if( previous_state == CALIBRATE )
   {
@@ -121,16 +122,16 @@ void selectState()
   else if( previous_state == GO_LEFT )
   {
     if     ( error > 0 && 
-             error < 2500 ){ state = GO_LEFT; }
-    else if( error < 0    ){ state = GO_RIGHT; }
+             error < 2500 ){ state = GO_RIGHT; }
+    else if( error < 0    ){ state = GO_LEFT; }
     else if( error == 2500 ){ state = STOP; }
-    else if( error = 0    ){ state = TURN_LEFT; }
+    else if( error == 0    ){ state = TURN_LEFT; }
   }
   else if( previous_state == GO_RIGHT )
   {
     if     ( error > 0 && 
-             error < 2500 ){ state = GO_LEFT; }
-    else if( error < 0    ){ state = GO_RIGHT; }
+             error < 2500 ){ state = GO_RIGHT; }
+    else if( error < 0    ){ state = GO_LEFT; }
     else if( error == 2500 ){ state = STOP; }
     else if( error == 0    ){ state = TURN_LEFT; }
   }
@@ -138,7 +139,7 @@ void selectState()
   else if( previous_state == GO_BLIND )
   {
     if( error == 2500 ){ state = GO_BLIND; }
-    else if( error < 2500 ){ GO_LEFT; }
+    else{ GO_LEFT; }
   }
   else if( error == 0 || previous_state == TURN_LEFT )
   {
