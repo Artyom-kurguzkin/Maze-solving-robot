@@ -42,9 +42,7 @@ void selectState()
 
   if( error > 0 ){ state = STATE_LEFT; }
   else{ state = STATE_RIGHT; }
-
   
-  state = next_state;
   
   switch(state)
   {
