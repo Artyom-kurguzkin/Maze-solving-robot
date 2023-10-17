@@ -17,12 +17,20 @@ ZumoMotors motors;
 Pushbutton button(ZUMO_BUTTON);
 
 int lastError = 0;
+int counter = 3;
 
 unsigned int sensors[6];
 
 int position = 0;
 
 
-void selectState();
+enum State{  FollowLine, 
+             Stop, 
+             LeapOfFaith,
+             IntercectionTurn } state;
+
+int MAX_SPEED  = 150;
+int SPEED_MIN  = 20;
+int SPEED_HALT = 0;
 
 #endif
