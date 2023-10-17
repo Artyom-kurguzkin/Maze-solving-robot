@@ -13,5 +13,5 @@ void setup()
 void loop()
 {
   selectState();
-  delay(40);
+  delay(120);
 }

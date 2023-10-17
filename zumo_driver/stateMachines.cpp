@@ -1,10 +1,10 @@
 #include "header.h"
 
 
-int counter = 1; //added one more for the crossroads
+int counter = 2; 
 
 
-const int SPEED_MAX  = 100;
+const int SPEED_MAX  = 150;
 const int SPEED_MIN  = 20;
 const int SPEED_HALT = 0;
 
@@ -83,15 +83,20 @@ void stateStop()
   Serial.println("stopping");
   Serial0.println("stopping");
   motors.setSpeeds(SPEED_HALT, SPEED_HALT);
-  if( counter <= 0 )
+
+  if( counter = 1 )
+  {
+    previous_state = TURN_LEFT;
+  }
+  else if( counter <= 0 )
   {
     while(1);
     pinMode(13, OUTPUT);
     digitalWrite(13, HIGH);
     Serial.println("end");
-  Serial0.println("end");
+    Serial0.println("end");
   }
-  delay( 5000 ); 
+  delay( 2000 ); 
   counter = counter - 1;
 }
 
@@ -100,7 +105,7 @@ void turnLeft()
 {
   Serial.println("left");
   Serial0.println("left");
-  motors.setSpeeds( -SPEED_MIN, SPEED_MAX);
+  motors.setSpeeds( -150, SPEED_MAX);
 }
 
 
@@ -123,37 +128,43 @@ void selectState()
   { 
     state = CALIBRATE; 
   }
+  
   else if( previous_state == CALIBRATE )
   {
     state = GO_LEFT;
   }
+  
   else if( previous_state == GO_LEFT )
   {
-    if     ( error > 0 && 
+    if( error == 2500 && ( counter != 1 )  ){ state = STOP; }
+    else if( position == 2500 ){ state = TURN_LEFT; }
+    else if( error > 0 && 
              error < 2500 ){ state = GO_RIGHT; }
     else if( error < 0    ){ state = GO_LEFT; }
-    else if( error == 2500 ){ state = STOP; }
-    else if( position < 2500 ){ state = TURN_LEFT; }
   }
+  
   else if( previous_state == GO_RIGHT )
   {
-    if     ( error > 0 && 
+    if( error == 2500 && ( counter != 1 )  ){ state = STOP; }
+    else if( position == 2500 ){ state = TURN_LEFT; }
+    else if( error > 0 && 
              error < 2500 ){ state = GO_RIGHT; }
     else if( error < 0    ){ state = GO_LEFT; }
-    else if( error == 2500 ){ state = STOP; }
-    else if( position < 2500 ){ state = TURN_LEFT; }
   }
-  else if( previous_state == STOP ){ state = GO_BLIND; }
+  
+  else if( previous_state == STOP && counter == 1 ){ state = GO_BLIND; } // <-here!
+  
   else if( previous_state == GO_BLIND )
   {
-    if( error == 2500 ){ state = GO_BLIND; }
-    else{ state = GO_LEFT; }
+    if( error == 2500 ){ state = GO_BLIND; }           
+    else{ state = STOP; }
   }
-  else if( position < 2500 && previous_state == TURN_LEFT )
+  
+  else if( previous_state == TURN_LEFT )
   {
-    if( sensors[1] > 100){ state = TURN_LEFT; }
+    if( sensors[0] && sensors[5] ){ state = TURN_LEFT; } // I don't think this statement ever catches
     else
-      state = TURN_LEFT;
+      state = GO_LEFT; // r12
   }
 
 
@@ -182,7 +193,7 @@ void selectState()
       break;
 
     case TURN_LEFT:
-      stateBlind();
+      turnLeft();
       break;
 
 
