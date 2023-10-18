@@ -33,6 +33,20 @@ void setup()
   Serial.println("calibration complete");
   Serial0.println("calibration complete");
 
+  float vb = analogRead(A1) * 3.2265 * 2;
+  Serial.print("battery: ");  Serial.println(vb);
+  Serial0.print("battery: "); Serial0.println(vb);
+  if( vb < 4800 )
+  {
+    Serial.println("battery input too low: "); Serial.println(vb);
+    Serial0.println("battery input too low: "); Serial0.println(vb);
+    while(1)
+        {
+          pinMode(13, OUTPUT);
+          digitalWrite(13, HIGH);
+        }
+  }
+
   button.waitForButton();  
 }
 
@@ -47,6 +61,9 @@ void loop()
   {
     case FollowLine:
     {
+      Serial.println("follow line");
+      Serial0.println("follow line");
+      
       int speedDifference = error / 4 + 6 * (error - lastError);
       lastError = error;
       
@@ -122,11 +139,9 @@ void loop()
         {
           pinMode(13, OUTPUT);
           digitalWrite(13, HIGH);
-          Serial.println("end");
-          Serial0.println("end");
         }
       }
-      delay( 2000 ); 
+      delay( 1000 ); 
       counter = counter - 1;
 
       break;
@@ -187,7 +202,9 @@ void loop()
     }
   }
 
-  delay(100);
+  delay(60);
 }
 
-// r0
+// r3
+// working pass
+// Artyom Kurguzkin, Andrew, Vone
