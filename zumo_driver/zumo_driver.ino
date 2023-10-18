@@ -206,5 +206,5 @@ void loop()
 }
 
 // r3
-// working pass
+// working credit 
 // Artyom Kurguzkin, Andrew, Vone
